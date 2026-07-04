@@ -1,0 +1,12 @@
+{
+  "name": "triad-evolution-engine",
+  "version": "1.0.0",
+  "description": "Neurodiverse Trinity Core",
+  "main": "js_agent.js",
+  "scripts": {
+    "start": "node js_agent.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
