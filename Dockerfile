@@ -1,55 +1,14 @@
-# ---------------------------------------------------------
-# 1. ベースイメージ（Node.js環境をベースに、全ての兄弟を詰め込む）
-# ---------------------------------------------------------
-FROM node:20-slim
-
-# 安定した動作のために作業ディレクトリを設定
+FROM node:20-bookworm
 WORKDIR /app
+# ビルド時のインタラクティブな入力を回避
+ENV DEBIAN_FRONTEND=noninteractive
 
-# ---------------------------------------------------------
-# 2. 全言語の実行環境・コンパイラを一括インストール
-# ---------------------------------------------------------
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    # 【共通・基本ツール】
-    curl ca-certificates build-essential \
-    # 【C言語 / C++（長男・次男：防壁・迎撃）】
-    gcc g++ \
-    # 【C#（三男：司令塔）】
-    mono-runtime mono-mcs \
-    # 【Perl / PHP（隠蔽・擬態の裏稼業）】
-    perl php-cli \
-    # 【Python（脳・ASD特性）】
-    python3 python3-pip python3-venv \
-    # 【Ruby（心・ADHD特性）】
-    ruby ruby-dev \
-    # 【Go言語（爆速の斥候）】
-    golang-go \
-    # 【Rust（鉄壁の騎士）】
-    rustc cargo \
-    # キャッシュを削除してイメージを軽量化（省メモリサバイバル）
-    && apt-get clean \
-    # テンポラリファイルの削除
+# 必要コンパイラのインストール
+RUN apt-get update && apt-get install -y \
+    build-essential gcc g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# ---------------------------------------------------------
-# 3. 3人の依存関係（パッケージ）のインストール
-# ---------------------------------------------------------
-# JavaScriptの依存関係
 COPY package*.json ./
 RUN npm ci --only=production
-
-# Pythonの依存関係がある場合はここで入れる（環境に合わせて変更してください）
-# COPY requirements.txt ./
-# RUN pip3 install --no-cache-dir -r requirements.txt
-
-# ---------------------------------------------------------
-# 4. ソースコードのコピー
-# ---------------------------------------------------------
-# リポジトリ内のすべてのエージェント（Py/Ruby/JS、そして今後増えるCやRustなど）をコピー
 COPY . .
-
-# ---------------------------------------------------------
-# 5. 起動コマンド（まずはJSエージェントを司令塔として起動）
-# ---------------------------------------------------------
-# ※JS（js_agent.js）から、他の兄弟（PythonやCなど）を裏で呼び出す想定です
 CMD ["node", "js_agent.js"]
