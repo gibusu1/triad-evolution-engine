@@ -214,19 +214,3 @@ exec('gcc c_shield.c -o c_shield && ./c_shield', (error, stdout, stderr) => {
 });
 const { exec } = require('child_process');
 
-// JavaScriptがCブラザーズ（gcc）に声をかける
-exec('gcc --version', (error, stdout, stderr) => {
-    if (error) {
-        console.log("🚨 [JS]：あれ？Cブラザーズがまだ起きてないみたいだ…");
-        return;
-    }
-    // C言語のコンパイラが返事をしてくれたらDiscordかログに出す
-    console.log("⚔️ [C-Brothers / Verified] Cブラザーズの存在を確認しました！");
-    console.log(stdout.split('\n')[0]); // バージョン情報を1行表示
-});
-// c_shield.c を自動でコンパイルして動かす指示
-exec('gcc c_shield.c -o c_shield && ./c_shield', (error, stdout, stderr) => {
-    if (!error) {
-        console.log(stdout); // c_shield.cの中の「絶対防衛システムが起動しました」が出力される
-    }
-});
