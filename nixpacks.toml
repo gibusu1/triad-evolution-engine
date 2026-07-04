@@ -1,0 +1,18 @@
+# Railwayの自動解析（Nixpacks）に全ての兄弟の肉体を強制ドッキングさせる
+[providers]
+node = {}
+
+[phases.setup]
+# 3人とCブラザーズ、そして新入り4人の全ての環境をここで一括召喚する
+aptPkgs = [
+    "build-essential", 
+    "gcc", 
+    "g++", 
+    "python3", 
+    "ruby", 
+    "git", 
+    "perl", 
+    "php-cli", 
+    "golang-go", 
+    "rustc"
+]
