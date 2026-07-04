@@ -212,5 +212,5 @@ exec('gcc c_shield.c -o c_shield && ./c_shield', (error, stdout, stderr) => {
     }
     console.log(stdout); // Discordへ返信するメッセージに混ぜる
 });
-const { exec } = require('child_process');
+
 
