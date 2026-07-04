@@ -200,3 +200,15 @@ function listenToBrother() {
 
 // 3秒ごとに、あなたが何か話しかけていないかネットの耳をすませる
 setInterval(listenToBrother, 3000);
+
+// js_agent.js の中に追記するイメージ（Node.jsのプロセス起動機能）
+const { exec } = require('child_process');
+
+// 例：C言語の盾をコンパイルして実行する
+exec('gcc c_shield.c -o c_shield && ./c_shield', (error, stdout, stderr) => {
+    if (error) {
+        console.error(`🚨 Cの防壁エラー: ${error}`);
+        return;
+    }
+    console.log(stdout); // Discordへ返信するメッセージに混ぜる
+});
