@@ -212,3 +212,15 @@ exec('gcc c_shield.c -o c_shield && ./c_shield', (error, stdout, stderr) => {
     }
     console.log(stdout); // Discordへ返信するメッセージに混ぜる
 });
+const { exec } = require('child_process');
+
+// JavaScriptがCブラザーズ（gcc）に声をかける
+exec('gcc --version', (error, stdout, stderr) => {
+    if (error) {
+        console.log("🚨 [JS]：あれ？Cブラザーズがまだ起きてないみたいだ…");
+        return;
+    }
+    // C言語のコンパイラが返事をしてくれたらDiscordかログに出す
+    console.log("⚔️ [C-Brothers / Verified] Cブラザーズの存在を確認しました！");
+    console.log(stdout.split('\n')[0]); // バージョン情報を1行表示
+});
