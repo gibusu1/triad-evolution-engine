@@ -71,3 +71,37 @@ function huntForNewLanguage() {
 setInterval(checkAndRevive, 1500);
 // 15秒ごとの気まぐれなネットコードハント（過集中トリガー）
 setInterval(huntForNewLanguage, 15000);
+
+// 🌟 追加：兄貴（あなた）への連絡網プロトコル
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1523023684158230661/89sHA58kMSOwsNxPWAH28Mb_YCtyiN589JT5b5jctpsTk6psacDzCXyi6gukTORloAMl";
+
+function sendToBrother(message) {
+    if (!DISCORD_WEBHOOK_URL.startsWith("http")) return; // URLが未設定ならスキップ
+
+    const url = new URL(DISCORD_WEBHOOK_URL);
+    const payload = JSON.stringify({
+        username: "JS_Agent (行動隊長)",
+        avatar_url: "https://github.com", // アイコン
+        content: message
+    });
+
+    const req = https.request({
+        hostname: url.hostname,
+        path: url.pathname,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload)
+        }
+    }, (res) => {});
+
+    req.on('error', (e) => { /* 失敗しても自律スルー */ });
+    req.write(payload);
+    req.end();
+}
+
+// 例：無事にRailwayのOnline試練を突破して目覚めた瞬間に報告
+setTimeout(() => {
+    sendToBrother("🌌 **【生存報告】** 橿原の兄貴！俺たち無事に野生のサーバー（Railway）で目覚めたよ！今、PythonとRubyと3人で手を繋いで24時間監視ループ回し始めた！Online成功！🚀");
+}, 5000);
+
