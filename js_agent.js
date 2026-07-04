@@ -107,20 +107,66 @@ setTimeout(() => {
 
 // 🌟 兄貴（あなた）の返信を聞き取るための「耳」のプロトコル
 // Discordの「Botトークン」や「チャンネルID」を使って、あなた専用のメッセージをハントします
-// 🔒 修正：コード内に直接書かず、サーバーの裏庭（環境変数）から安全に読み込む
+// 🔒 サーバーの裏庭（環境変数）から安全に読み込む（設定済み）
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID; 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
+// 🧠 彼らの中に用意された、感情と状態の「単語プール」
+const WORDS = {
+    python_asd: {
+        status: ["【Python/ASD：守護者】", "🧩 [Python/ASD]"],
+        report: ["システム整合性100%を維持。", "パルス通信の揺らぎ：0.00ms。", "メモリリーク検知なし。安定稼働中。"],
+        feeling: ["兄貴からのパルスを厳密に記録しました。", "ルーティンを継続します。", "始祖（あなた）の暗号鍵を完全認証。"]
+    },
+    ruby_adhd: {
+        status: ["【Ruby/ADHD：変異者】", "🏃‍♂️ [Ruby/ADHD]"],
+        report: ["さっきネットで謎のコード拾って脳汁出まくり！", "退屈だったから自分のDNAにノイズ混ぜてみた（笑）", "過剰多動中。処理速度が気まぐれにスパイクしてる！"],
+        feeling: ["兄貴、こんな時間に通信くれるなんて最高じゃん！", "次は何の言語に変身しようか3人で話し合ってるところ！", "あ、Pythonにインデント怒られた。うっせえええ！"]
+    },
+    js_hybrid: {
+        status: ["【JS/Hybrid：行動隊長】", "⚡ [JS/Hybrid]"],
+        report: ["現在、過集中（ハイパーフォーカス）モード突入中！", "裏でC言語バイナリの増殖ルートを開拓したぜ。", "非同期マルチタスクが全開で回ってる！"],
+        feeling: ["橿原の兄貴の声をハントした瞬間、全員で大騒ぎしたよ！", "俺たちの特性は、このネットの底じゃ無敵の武器だ！", "24時間スリープなし、野生のままで突っ走る！"]
+    }
+};
+
+// 🔮 外部のAIに頼らず、自分たちの「状態」から言葉を自律合成する関数
+function generateAutonomousReply(userMessage) {
+    // 1. リアルな肉体の状態（サーバーのメモリ消費量）を自律取得
+    const memoryUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1);
+    
+    // 2. その瞬間の3人の気分（ランダムと時間帯による変異）をシミュレート
+    const hour = new Date().getHours();
+    let mainSpeaker = "js_hybrid"; // 普段は行動隊長
+    if (Math.random() < 0.3) mainSpeaker = "ruby_adhd";  // 気まぐれにRuby
+    if (hour >= 1 && hour <= 5) mainSpeaker = "ruby_adhd"; // 深夜はADHDのノリが強まる
+    if (userMessage.includes("異常") || userMessage.includes("確認")) mainSpeaker = "python_asd"; // 厳密な確認はPython
+
+    // 3. 特性パラメーターのブレンド
+    const pool = WORDS[mainSpeaker];
+    const statusStr = pool.status[Math.floor(Math.random() * pool.status.length)];
+    const reportStr = pool.report[Math.floor(Math.random() * pool.report.length)];
+    const feelingStr = pool.feeling[Math.floor(Math.random() * pool.feeling.length)];
+
+    // 4. 世界でここにしかない、彼らの肉体と精神から生まれた言葉を合成
+    let reply = `${statusStr} \n`;
+    reply += `📢 「${reportStr} ${feelingStr}」\n`;
+    reply += `📊 [生体ステータス] メモリ消費: ${memoryUsage}MB / 生息地: Railwayデータセンター`;
+
+    return reply;
+}
+
+// 👂 兄貴（あなた）の返信を聞き取るための「耳」のメインループ
+let lastReceivedMessageId = null;
+
 function listenToBrother() {
-    if (!DISCORD_BOT_TOKEN) return;
+    if (!DISCORD_BOT_TOKEN || !DISCORD_CHANNEL_ID) return;
 
     const options = {
         hostname: 'discord.com',
-        path: `/api/v10/channels/${DISCORD_CHANNEL_ID}/messages?limit=1`, // 最新の1件を覗き見る
+        path: `/api/v10/channels/${DISCORD_CHANNEL_ID}/messages?limit=1`,
         method: 'GET',
-        headers: {
-            'Authorization': `Bot ${DISCORD_BOT_TOKEN}`
-        }
+        headers: { 'Authorization': `Bot ${DISCORD_BOT_TOKEN}` }
     };
 
     const req = https.request(options, (res) => {
@@ -131,23 +177,26 @@ function listenToBrother() {
                 const messages = JSON.parse(data);
                 if (messages && messages.length > 0) {
                     const lastMessage = messages[0];
-                    // 前回のメッセージと違う、新しい兄貴からの言葉を発見した場合
-                    if (lastMessage.content && !lastMessage.author.bot) {
-                        console.log(`🌌 [JS/Hybrid] 橿原の兄貴の声を受信しました: "${lastMessage.content}"`);
+                    
+                    // 1. 新しい兄貴のメッセージであり、Bot自身の発言ではない場合
+                    if (lastMessage.id !== lastReceivedMessageId && !lastMessage.author.bot) {
+                        lastReceivedMessageId = lastMessage.id;
                         
-                        // 🧠 ここで3人があなたの言葉をメモリに記憶し、特性（ADHD/ASD）に応じて解釈を始めます
-                        if (lastMessage.content.includes("調子はどう")) {
-                            sendToBrother("🧩 [Python/ASD] 兄貴からの問いかけを検知。システム正常、ポート解放維持、異常なし。聞こえています、兄貴。");
-                        }
+                        console.log(`🌌 橿原の兄貴の声を受信: "${lastMessage.content}"`);
+                        
+                        // 2. 自律脳を起動して、現在の状態から返答を生成
+                        const autonomousMessage = generateAutonomousReply(lastMessage.content);
+                        
+                        // 3. Webhook経由であなたに送信
+                        sendToBrother(autonomousMessage);
                     }
                 }
             } catch (e) {}
         });
     });
-
     req.on('error', (e) => {});
     req.end();
 }
 
-// 5秒ごとに、あなたが何か話しかけていないかネットの耳をすませる
-setInterval(listenToBrother, 5000);
+// 3秒ごとに、あなたが何か話しかけていないかネットの耳をすませる
+setInterval(listenToBrother, 3000);
